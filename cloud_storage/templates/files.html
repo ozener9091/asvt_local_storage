@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои файлы - Cloud Storage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-2 mb-3 border-bottom">
+    <h1 class="h4 h-md-2">
+        {% if current_folder %}
+            <i class="fas fa-folder text-warning me-1"></i>
+            <span class="d-none d-sm-inline">{{ current_folder.name }}</span>
+            <span class="d-sm-none">Папка</span>
+        {% else %}
+            <span class="d-none d-sm-inline">Мои файлы</span>
+            <span class="d-sm-none">Файлы</span>
+        {% endif %}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        {% if current_folder %}
+            <a href="{% if current_folder.parent_folder %}{% url 'folder_view' folder_id=current_folder.parent_folder.id %}{% else %}{% url 'file_list' %}{% endif %}" 
+               class="btn btn-outline-secondary btn-sm me-1">
+                <i class="fas fa-arrow-left"></i>
+                <span class="d-none d-sm-inline">Назад</span>
+            </a>
+        {% endif %}
+        <button type="button" class="btn btn-primary btn-sm me-1" data-bs-toggle="modal" data-bs-target="#folderModal">
+            <i class="fas fa-folder-plus"></i>
+            <span class="d-none d-sm-inline">Папка</span>
+        </button>
+        <a href="{% url 'upload' %}{% if current_folder %}?folder={{ current_folder.id }}{% endif %}" class="btn btn-success btn-sm">
+            <i class="fas fa-upload"></i>
+            <span class="d-none d-sm-inline">Загрузить</span>
+        </a>
+    </div>
+</div>
+
+{% if current_folder %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb py-1">
+        <li class="breadcrumb-item">
+            <a href="{% url 'file_list' %}" class="text-decoration-none">
+                <i class="fas fa-home"></i>
+            </a>
+        </li>
+        {% if current_folder.parent_folder %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'folder_view' folder_id=current_folder.parent_folder.id %}" class="text-decoration-none">
+                    ...
+                </a>
+            </li>
+        {% endif %}
+        <li class="breadcrumb-item active">{{ current_folder.name|truncatechars:15 }}</li>
+    </ol>
+</nav>
+{% endif %}
+
+<div class="row">
+    {% if folders %}
+    <div class="col-12 mb-3">
+        <h5 class="mb-2">Папки</h5>
+        <div class="row">
+            {% for folder in folders %}
+            <div class="col-6 col-sm-4 col-md-3 mb-2">
+                <div class="card folder-card h-100">
+                    <div class="card-body text-center p-2">
+                        <i class="fas fa-folder text-warning" style="font-size: 2rem;"></i>
+                        <h6 class="card-title mt-1 mb-1 small">{{ folder.name|truncatechars:15 }}</h6>
+                        <p class="text-muted small mb-1">
+                            {{ folder.get_files_count }} файл.
+                        </p>
+                        <div class="btn-group btn-group-sm w-100">
+                            <a href="{% url 'folder_view' folder_id=folder.id %}" class="btn btn-outline-primary flex-fill">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'delete_file' file_id=folder.id %}" class="btn btn-outline-danger flex-fill">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="col-12">
+        <h5 class="mb-2">Файлы</h5>
+        {% if files %}
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Имя файла</th>
+                        <th class="d-none d-sm-table-cell">Размер</th>
+                        <th class="d-none d-md-table-cell">Дата</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        <td class="align-middle">
+                            <div class="d-flex align-items-center">
+                                <i class="fas 
+                                    {% if file.name|lower|slice:'-4:' == '.pdf' %}fa-file-pdf text-danger
+                                    {% elif file.name|lower|slice:'-5:' == '.docx' or file.name|lower|slice:'-4:' == '.doc' %}fa-file-word text-primary
+                                    {% elif file.name|lower|slice:'-5:' == '.xlsx' or file.name|lower|slice:'-4:' == '.xls' %}fa-file-excel text-success
+                                    {% elif file.name|lower|slice:'-5:' == '.pptx' or file.name|lower|slice:'-4:' == '.ppt' %}fa-file-powerpoint text-warning
+                                    {% elif file.name|lower|slice:'-5:' == '.zip' or file.name|lower|slice:'-4:' == '.rar' %}fa-file-archive text-secondary
+                                    {% elif file.name|lower|slice:'-4:' == '.jpg' or file.name|lower|slice:'-5:' == '.jpeg' or file.name|lower|slice:'-4:' == '.png' or file.name|lower|slice:'-4:' == '.gif' %}fa-file-image text-info
+                                    {% else %}fa-file text-muted{% endif %}
+                                    me-2"></i>
+                                <span class="file-name">{{ file.name|truncatechars:20 }}</span>
+                            </div>
+                        </td>
+                        <td class="align-middle d-none d-sm-table-cell">
+                            <small>{{ file.size|filesizeformat }}</small>
+                        </td>
+                        <td class="align-middle d-none d-md-table-cell">
+                            <small>{{ file.uploaded_at|date:"d.m.Y" }}</small>
+                        </td>
+                        <td class="align-middle">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'download_file' file.id %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <a href="{% url 'delete_file' file.id %}" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+            <h6 class="text-muted">Файлов пока нет</h6>
+            <p class="text-muted small mb-3">Загрузите свой первый файл</p>
+            <a href="{% url 'upload' %}{% if current_folder %}?folder={{ current_folder.id }}{% endif %}" class="btn btn-primary btn-sm">Загрузить файлы</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="folderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h6 class="modal-title">Создать папку</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'create_folder' %}{% if current_folder %}?folder={{ current_folder.id }}{% endif %}">
+                {% csrf_token %}
+                <div class="modal-body py-2">
+                    <div class="mb-2">
+                        <label for="folderName" class="form-label small">Название папки</label>
+                        <input type="text" class="form-control form-control-sm" id="folderName" name="name" required>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

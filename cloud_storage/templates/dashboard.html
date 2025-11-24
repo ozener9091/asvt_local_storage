@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Дашборд - Cloud Storage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-2 mb-3 border-bottom">
+    <h1 class="h4 h-md-2">
+        <span class="d-none d-sm-inline">Дашборд</span>
+        <span class="d-sm-none">Обзор</span>
+    </h1>
+</div>
+
+<div class="row g-2">
+    <div class="col-6 col-md-4">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Файлы</h6>
+                        <h5 class="card-text mb-0">{{ total_files }}</h5>
+                    </div>
+                    <div>
+                        <i class="fas fa-file"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-6 col-md-4">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Размер</h6>
+                        <h5 class="card-text mb-0">{{ total_size }} МБ</h5>
+                    </div>
+                    <div>
+                        <i class="fas fa-hdd"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12 col-md-4 mt-2 mt-md-0">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Свободно</h6>
+                        <h5 class="card-text mb-0">1024 МБ</h5>
+                    </div>
+                    <div>
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header py-2">
+                <h6 class="mb-0">Недавние файлы</h6>
+            </div>
+            <div class="card-body p-2">
+                {% if recent_files %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <tbody>
+                                {% for file in recent_files %}
+                                <tr>
+                                    <td class="align-middle">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file text-muted me-2"></i>
+                                            <small>{{ file.name|truncatechars:25 }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle d-none d-sm-table-cell">
+                                        <small>{{ file.size|filesizeformat }}</small>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'download_file' file.id %}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-folder-open fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small mb-2">У вас пока нет файлов.</p>
+                        <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Загрузить файл</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header py-2">
+                <h6 class="mb-0">Быстрые действия</h6>
+            </div>
+            <div class="card-body p-2">
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{% url 'upload' %}" class="btn btn-primary btn-sm flex-fill me-md-1 mb-1">
+                        <i class="fas fa-upload me-1"></i>Загрузить
+                    </a>
+                    <a href="{% url 'file_list' %}" class="btn btn-outline-secondary btn-sm flex-fill ms-md-1 mb-1">
+                        <i class="fas fa-folder me-1"></i>Файлы
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

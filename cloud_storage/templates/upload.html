@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Загрузка файлов - Cloud Storage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Загрузка файлов</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.file.id_for_label }}" class="form-label">Выберите файлы</label>
+                        {{ form.file }}
+                        <div class="form-text">Вы можете выбрать несколько файлов одновременно (удерживайте Ctrl или Shift).</div>
+                        {% if form.file.errors %}
+                            <div class="text-danger">
+                                {% for error in form.file.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload me-2"></i>Загрузить файлы
+                    </button>
+                    <a href="{% url 'file_list' %}" class="btn btn-secondary">Отмена</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Советы по загрузке</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-info-circle text-primary me-2"></i>Максимальный размер файла: 100 МБ</li>
+                    <li><i class="fas fa-info-circle text-primary me-2"></i>Поддерживаются все типы файлов</li>
+                    <li><i class="fas fa-info-circle text-primary me-2"></i>Файлы автоматически сортируются по типам</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
